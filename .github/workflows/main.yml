@@ -11,12 +11,13 @@ jobs:
 
     defaults:
       run:
-        working-directory: android-project   # ✅ project folder fix
+        working-directory: android-project
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # ✅ Node setup
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -26,7 +27,7 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      # ✅ Build web app (Gemini API key use karega)
+      # ✅ Build web app (creates dist/)
       - name: Build web app
         run: npm run build
         env:
@@ -49,12 +50,18 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
+      # ✅ FIX: generate wrapper in CI (no .jar needed)
+      - name: Generate Gradle Wrapper
+        working-directory: android-project/android
+        run: |
+          gradle wrapper --gradle-version 8.7
+
       # ✅ Build APK
       - name: Build Debug APK
         working-directory: android-project/android
         run: |
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --stacktrace
 
       # ✅ Upload APK
       - name: Upload APK

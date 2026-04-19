@@ -17,53 +17,46 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # ✅ Node setup
+      # Node setup
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      # ✅ Install dependencies
+      # Install dependencies
       - name: Install dependencies
         run: npm install
 
-      # ✅ Build web app (creates dist/)
+      # Build web app (creates dist/)
       - name: Build web app
         run: npm run build
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
-      # ✅ Copy dist → Android assets
+      # Copy dist → Android assets
       - name: Copy web assets
         run: |
           mkdir -p android/app/src/main/assets/public
           cp -r dist/* android/app/src/main/assets/public/
 
-      # ✅ Java setup
+      # Java setup
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
 
-      # ✅ Gradle setup
+      # Gradle setup
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      # ✅ FIX: generate wrapper in CI (no .jar needed)
-      - name: Generate Gradle Wrapper
-        working-directory: android-project/android
-        run: |
-          gradle wrapper --gradle-version 8.7
-
-      # ✅ Build APK
+      # ✅ FINAL BUILD (NO WRAPPER)
       - name: Build Debug APK
         working-directory: android-project/android
         run: |
-          chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace
+          gradle assembleDebug --stacktrace
 
-      # ✅ Upload APK
+      # Upload APK
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
